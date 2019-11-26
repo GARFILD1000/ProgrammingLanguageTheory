@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/ruleLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLength="1"
+            android:textAlignment="center"
+            android:minWidth="50dp"
+            android:textColor="@color/colorTextDark"
+            android:inputType="textNoSuggestions"
+            android:hint="empty" />
+
+        <ImageView
+            android:id="@+id/ruleArrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:scaleType="center"
+            android:src="@drawable/ic_rule_arrow" />
+
+        <EditText
+            android:id="@+id/ruleRight"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingEnd="15dp"
+            android:paddingStart="0dp"
+            android:minWidth="50dp"
+            android:textColor="@color/colorTextDark"
+            android:ellipsize="start"
+            android:singleLine="true"
+            android:inputType="textNoSuggestions"
+            android:hint="empty"/>
+        <ImageButton
+            android:id="@+id/addRulePart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/ic_add"
+            android:background="@android:color/transparent"
+            />
+        <ImageButton
+            android:id="@+id/deleteRule"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:src="@drawable/ic_delete"
+            android:background="@android:color/transparent"
+            />
+    </LinearLayout>
+</layout>

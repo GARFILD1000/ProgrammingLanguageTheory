@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/graph"
+    app:startDestination="@id/automateFragment">
+    <fragment
+        android:id="@+id/automateFragment"
+        android:name="com.example.automate.view.AutomateFragment"
+        android:label="AutomateFragment"
+        tools:layout="@layout/fragment_automate">
+        <action
+                    android:id="@+id/action_automateFragment_to_chainsFragment"
+                    app:destination="@id/chainsFragment" />
+    </fragment>
+
+    <fragment
+    android:id="@+id/chainsFragment"
+    android:name="com.example.automate.view.ChainsFragment"
+    android:label="ChainsFragment"
+    tools:layout="@layout/fragment_chains">
+
+        <action
+            android:id="@+id/action_chainsFragment_to_graphFragment"
+            app:destination="@id/graphFragment" />
+    </fragment>
+    <fragment
+    android:id="@+id/graphFragment"
+    android:name="com.example.automate.view.GraphFragment"
+    android:label="GraphFragment"
+    tools:layout="@layout/fragment_graph">
+
+</fragment>
+</navigation>
