@@ -174,13 +174,13 @@ class Grammar{
 
         if (!hasNonTerminals(chain.data)){
             if (chain.data.length >= minLength && chain.data.length <= maxLength) {
-                val findedChain = createdChains.find { element->
-                    element.data == chain.data
-                }
-                if (findedChain == null) {
+//                val findedChain = createdChains.find { element->
+//                    element.data == chain.data
+//                }
+//                if (findedChain == null) {
                     Log.d(LOG_TAG,"Add chain: ${chain.data}")
                     createdChains.add(chain)
-                }
+//                }
             }
             return
         }

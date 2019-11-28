@@ -65,7 +65,7 @@ class Automate {
                 //currState?: continue
                 val nextPossibleStates = LinkedList<DestinationRule>()
                 val transitWithShift = transitionFunction.transit(TransitionRule(currState!!, currSymbol, currentStackTop))
-                if (transitWithShift != null){
+                if (transitWithShift != null) {
                     nextPossibleStates.add(transitWithShift)
                     shift = currSymbol.length
                     Log.d("Automate","Transition (${transitWithShift.state},${transitWithShift.stack.joinToString()}) ")
