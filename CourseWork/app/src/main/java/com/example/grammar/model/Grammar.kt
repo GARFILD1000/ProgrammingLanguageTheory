@@ -5,225 +5,96 @@ import androidx.room.*
 import com.example.grammar.utils.TreeVertex
 import java.util.*
 
-@Entity (tableName = "grammar")
-class Grammar{
+class Grammar {
     @Ignore
     private val LOG_TAG = "Grammar"
 
-    @PrimaryKey(autoGenerate = true)
-    var id = 0
-    @Ignore
     var terminals = listOf<Symbol>()
-    @Ignore
     var nonTerminals = listOf<Symbol>()
-    @TypeConverters(RulesConverter::class)
     var rules = LinkedList<GrammarRule>()
-    @Ignore
     var startSymbol = Symbol()
-
-    class RulesConverter{
-        @TypeConverter
-        fun fromRules(fromRules: LinkedList<GrammarRule>):String{
-            val stringBuilder = StringBuilder()
-            for (rule in fromRules){
-                rule.leftPart.forEach{
-                    if (it.isTerminal) {
-                        stringBuilder.append("T${it.value}\n")
-                    } else {
-                        stringBuilder.append("N${it.value}\n")
-                    }
-                }
-                stringBuilder.append("${GrammarRule.delimeter}\n")
-                rule.rightPart.forEach{
-                    if (it.isTerminal) {
-                        stringBuilder.append("T${it.value}\n")
-                    } else {
-                        stringBuilder.append("N${it.value}\n")
-                    }
-                }
-                stringBuilder.append("\n")
-            }
-            val lastLineDivider = stringBuilder.lastIndexOf("\n")
-            if (lastLineDivider >= 0) stringBuilder.removeRange(lastLineDivider, lastLineDivider)
-            return  stringBuilder.toString()
-        }
-
-        @TypeConverter
-        fun toRules(toRules: String): LinkedList<GrammarRule>{
-            val allRules = LinkedList<GrammarRule>()
-            val everyRulesString = toRules.split("\n")
-            for (ruleString in everyRulesString){
-                val ruleParts = ruleString.split(GrammarRule.delimeter)
-                val parsedRule = GrammarRule().apply{
-                    ruleParts.getOrNull(0)?.let{
-                        it.split("\n").forEach {
-                            if (it.isNotEmpty() && it.startsWith("T")){
-                                leftPart.addLast(Symbol(it.removeRange(0,1), true))
-                            } else if (it.isNotEmpty() && it.startsWith("N")){
-                                leftPart.addLast(Symbol(it.removeRange(0,1), false))
-                            }
-                        }
-                    }
-                    ruleParts.getOrNull(1)?.let{
-                        it.split("\n").forEach {
-                            if (it.isNotEmpty() && it.startsWith("T")){
-                                rightPart.addLast(Symbol(it.removeRange(0,1), true))
-                            } else if (it.isNotEmpty() && it.startsWith("N")){
-                                rightPart.addLast(Symbol(it.removeRange(0,1), false))
-                            }
-                        }
-                    }
-                }
-                if (parsedRule.leftPart.isNotEmpty()) {
-                    allRules.add(parsedRule)
-                }
-            }
-            return allRules
-        }
-    }
-
-    fun parseTerminalsFromRules(targetRules: LinkedList<GrammarRule>): List<Symbol>{
-        val newTerminals = LinkedList<Symbol>()
-        for (rule in targetRules){
-            val symbols = rule.rightPart
-            for (symbol in symbols){
-                if (symbol.isTerminal && !newTerminals.contains(symbol)) {
-                    newTerminals.add(symbol)
-                }
-            }
-        }
-        return newTerminals
-    }
-
-    @Ignore
     private var minLength = 0
-    @Ignore
     private var maxLength = 0
-    @Ignore
     private var createdChains = LinkedList<Chain>()
 
-    fun createChains(minLength: Int, maxLength: Int): LinkedList<Chain>{
+    fun createChains(minLength: Int, maxLength: Int): LinkedList<Chain> {
         this.minLength = minLength
         this.maxLength = maxLength
         createdChains = LinkedList<Chain>()
 
         var startRuleNumber = -1
 
-        for (i in rules.indices){
-            if (rules[i].leftPart.contains(startSymbol)){
+        for (i in rules.indices) {
+            if (rules[i].leftPart.contains(startSymbol)) {
                 startRuleNumber = i
+                break
             }
         }
-        if (startRuleNumber < 0){
+        if (startRuleNumber < 0) {
             return createdChains
         }
-        val newChain = Chain().apply{
-            data = LinkedList<Symbol>().apply{add(startSymbol)}
-            graph = TreeVertex(GraphElement().apply{data = startSymbol})
+        val newChain = Chain().apply {
+            symbols = LinkedList<Symbol>().apply { add(startSymbol) }
         }
-
-//        createChain(newChain, newChain.graph!!)
-        createChainWithTree(newChain)
-
-//        Log.d(LOG_TAG, "Creating completed!")
-//        for (chain in createdChains){
-//            Log.d(LOG_TAG,"Created chain: ${chain.data}")
-//        }
+        createChain(newChain)
         return createdChains
     }
 
-    private fun hasNonTerminals(treeVertex: TreeVertex<GraphElement>): Boolean{
-        if (treeVertex.childs.isEmpty()){
-            return nonTerminals.contains(treeVertex.data.data)
+    private fun createChain(chain: Chain, checkUnique: Boolean = false) {
+        if (chain.terminalsCount() > maxLength) {
+            return
         }
-        else {
-            var hasNonTerminals = false
-            for(child in treeVertex.childs){
-                hasNonTerminals = hasNonTerminals || hasNonTerminals(child)
-                if (hasNonTerminals) break
+        if (!hasNonTerminals(chain)) {
+            if (chain.terminalsCount() in minLength..maxLength) {
+                if (checkUnique) {
+                    val findedChain = createdChains.find { element ->
+                        element.symbols == chain.symbols
+                    }
+                    if (findedChain == null) {
+                        createdChains.add(chain)
+                    }
+                } else {
+                    createdChains.add(chain)
+                }
             }
-            return hasNonTerminals
+            return
+        }
+
+        for (rule in rules) {
+            for (symbol in chain.symbols) {
+                if (rule.leftPart.contains(symbol)) {
+                    val newChain = chain.copy()
+                    newChain.rules.addLast(rule)
+                    newChain.symbols.replaceFirst(rule.leftPart, rule.rightPart)
+                    createChain(newChain)
+                    break
+                }
+            }
         }
     }
 
-    private fun createChainWithTree(chain: Chain){
-        if (chain.data.filter { it.isTerminal }.size > maxLength){
-
-            return
-        }
-
-        if (!hasNonTerminals(chain)){
-            if (chain.size in minLength..maxLength) {
-//                val findedChain = createdChains.find { element->
-//                    element.data == chain.data
-//                }
-//                if (findedChain == null) {
-                    createdChains.add(chain)
-//                }
-            } else {
-                println("Chain : ${chain}")
-                println( "Not in $maxLength")
-            }
-            return
-        }
-        var rulesApplied = false
-        for (rule in rules){
-            val newGraph = chain.graph!!.copy()
-            val currentSymbols = newGraph.getTreeTopElements()
-            for (symbol in currentSymbols){
-                if (rule.leftPart.contains(symbol.data.data)){
-                    rulesApplied = true
-                    if (rule.rightPart.isEmpty()){
-                        symbol.addChild(GraphElement().apply {data = Symbol() })
-                    }
-                    else{
-                        rule.rightPart.forEach {ruleSymbol ->
-                            symbol.addChild(GraphElement().apply {data = ruleSymbol})
+    fun createTree(chain: Chain): TreeVertex<GraphElement>{
+        val graph = TreeVertex(GraphElement().apply { data = startSymbol })
+        for (rule in chain.rules) {
+            val currentSymbols = graph.getTreeTopElements()
+            for (symbol in currentSymbols) {
+                if (rule.leftPart.contains(symbol.data.data)) {
+                    if (rule.rightPart.isEmpty() || rule.rightPart.contains(Symbol.EMPTY)) {
+                        symbol.addChild(GraphElement(Symbol.EMPTY))
+                    } else {
+                        rule.rightPart.forEach { ruleSymbol ->
+                            symbol.addChild(GraphElement().apply { data = ruleSymbol })
                         }
                     }
                     break
                 }
             }
-            if (rulesApplied) {
-                val topElements = LinkedList<Symbol>()
-                newGraph.getTreeTopElements().forEach { symbol ->
-                    topElements.addLast(symbol.data.data)
-                }
-                val newChain = Chain().apply {
-                    data = topElements
-                    graph = newGraph
-                }
-                createChainWithTree(newChain)
-            }
-            rulesApplied = false
         }
+        return graph
     }
 
-    private fun String.insert(substring: String, fromPosition: Int):String{
-        var builder = StringBuilder()
-        if (fromPosition > 0){
-            builder.append(this.substring(0, fromPosition-1))
-        }
-        builder.append(substring)
-        if (fromPosition < this.length) {
-            builder.append(this.substring(fromPosition))
-        }
-        return builder.toString()
-    }
-
-    private fun String.remove(atPosition: Int): String{
-        var builder = StringBuilder()
-        if (atPosition > 0) {
-            builder.append(this.substring(0, atPosition-1))
-        }
-        if (atPosition < this.length-1) {
-            builder.append(this.substring(atPosition + 1))
-        }
-        return builder.toString()
-    }
-
-    private fun hasNonTerminals(chain: Chain): Boolean{
-        return chain.data.indexOfFirst { !it.isTerminal } != -1
+    private fun hasNonTerminals(chain: Chain): Boolean {
+        return chain.symbols.indexOfFirst { !it.isTerminal } != -1
     }
 
     override fun toString(): String {
@@ -235,31 +106,26 @@ class Grammar{
     }
 }
 
-fun <T> LinkedList<T>.replaceFirst(replacedSymbol:List<T>, newSymbols: List<T>): LinkedList<T>{
-    val newList = LinkedList<T>()
-    this.forEach{
-        newList.add(it)
-    }
-    if (replacedSymbol.isEmpty()) return newList
+fun <T> LinkedList<T>.replaceFirst(replacedSymbol: List<T>, newSymbols: List<T>) {
+    if (replacedSymbol.isEmpty()) return
     var replacePosition = indexOfFirst(replacedSymbol)
 
     if (replacePosition >= 0) {
-        newList.removeRange(replacePosition, replacePosition + replacedSymbol.size - 1)
+        this.removeRange(replacePosition, replacePosition + replacedSymbol.size - 1)
         newSymbols.forEach {
-            newList.add(replacePosition, it)
+            this.add(replacePosition, it)
             replacePosition++
         }
     }
-    return newList
 }
 
-fun <T> List<T>.indexOfFirst(list: List<T>): Int{
+fun <T> List<T>.indexOfFirst(list: List<T>): Int {
     var indexOfFirst = -1
-    for (i in this.indices){
+    for (i in this.indices) {
         var matches = true
         var idx = i
         for (symbol in list) {
-            if (symbol != this.getOrNull(idx)){
+            if (symbol != this.getOrNull(idx)) {
                 matches = false
                 break
             }
@@ -273,22 +139,17 @@ fun <T> List<T>.indexOfFirst(list: List<T>): Int{
     return indexOfFirst
 }
 
-fun <T> LinkedList<T>.removeRange(startIndex: Int, endIndex: Int){
-    for(i in startIndex..endIndex) {
+fun <T> LinkedList<T>.removeRange(startIndex: Int, endIndex: Int) {
+    for (i in startIndex..endIndex) {
         if (startIndex in 0 until this.size) {
             this.removeAt(startIndex)
         }
     }
 }
 
-fun main(){
+fun main() {
     var list = LinkedList<String>()
-    list.addLast("1")
-    list.addLast("2")
-    list.addLast("3")
-    list.addLast("4")
-    list.addLast("5")
-    println("Index of first: "+list.indexOfFirst(listOf("3", "4")))
-    println("Index of first: "+list.indexOfFirst(listOf("2", "4")))
-    println("Replace first: "+list.replaceFirst(listOf("2"), listOf("3", "4")))
+    list.addLast("0")
+    list.replaceFirst(listOf("0"), listOf("a", "1"))
+    println("Replace first: " + list)
 }

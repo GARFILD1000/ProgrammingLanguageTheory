@@ -10,25 +10,36 @@
         android:label="GrammarFragment"
         tools:layout="@layout/fragment_grammar">
         <action
-                    android:id="@+id/action_grammarFragment_to_chainsFragment"
-                    app:destination="@id/chainsFragment" />
+            android:id="@+id/action_grammarFragment_to_chainsFragment"
+            app:destination="@id/chainsFragment" />
+        <action
+            android:id="@+id/action_grammarFragment_to_filesFragment"
+            app:destination="@id/filesFragment" />
     </fragment>
 
     <fragment
-    android:id="@+id/chainsFragment"
-    android:name="com.example.grammar.view.ChainsFragment"
-    android:label="ChainsFragment"
-    tools:layout="@layout/fragment_chains">
+        android:id="@+id/chainsFragment"
+        android:name="com.example.grammar.view.ChainsFragment"
+        android:label="ChainsFragment"
+        tools:layout="@layout/fragment_chains">
 
         <action
             android:id="@+id/action_chainsFragment_to_graphFragment"
             app:destination="@id/graphFragment" />
+        <action
+            android:id="@+id/action_chainsFragment_to_filesFragment"
+            app:destination="@id/filesFragment" />
     </fragment>
     <fragment
-    android:id="@+id/graphFragment"
-    android:name="com.example.grammar.view.GraphFragment"
-    android:label="GraphFragment"
-    tools:layout="@layout/fragment_graph">
-
-</fragment>
+        android:id="@+id/graphFragment"
+        android:name="com.example.grammar.view.GraphFragment"
+        android:label="GraphFragment"
+        tools:layout="@layout/fragment_graph">
+    </fragment>
+    <fragment
+        android:id="@+id/filesFragment"
+        android:name="com.example.grammar.view.FilesFragment"
+        android:label="FilesFragment"
+        tools:layout="@layout/fragment_files">
+    </fragment>
 </navigation>

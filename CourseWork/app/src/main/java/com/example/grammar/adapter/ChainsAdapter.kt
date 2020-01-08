@@ -57,7 +57,7 @@ class ChainsAdapter() : RecyclerView.Adapter<ChainsAdapter.ViewHolder>(){
         val chainText = binding.chainTextView
 
         fun bind(item: Chain){
-            chainText.setText(item.data.joinToString(""))
+            chainText.setText(item.symbols.joinToString(""))
             chainText.setOnClickListener {
                 if (adapterPosition != RecyclerView.NO_POSITION){
                     onChainClick(item)

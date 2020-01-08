@@ -22,7 +22,7 @@ import kotlin.math.*
 
 
 class GraphView : FrameLayout {
-    private var chain: Chain = Chain()
+    private var graph: TreeVertex<GraphElement>? = null
 
     private var graphViews: HashMap<String, GraphElementView> = HashMap()
 
@@ -97,8 +97,8 @@ class GraphView : FrameLayout {
 
 
     private fun autoPosition(onEnded: () -> Unit) {
-        chain.graph ?: return
-        treeStructure = buildTree(graphViews, chain.graph!!.data.id)
+        graph ?: return
+        treeStructure = buildTree(graphViews, graph!!.data.id)
         if (treeStructure == null) {
             return
         }
@@ -212,7 +212,7 @@ class GraphView : FrameLayout {
         //var treeStructure: TreeVertex<GraphElementView>? = null
         if (startFragment != null) {
             treeStructure = TreeVertex(fragments.get(startElementId)!!)
-            buildSubTree(fragments, treeStructure!!, chain.graph!!)
+            buildSubTree(fragments, treeStructure!!, graph!!)
         }
         return treeStructure
     }
@@ -862,12 +862,12 @@ class GraphView : FrameLayout {
         }
     }
 
-    fun setChain(newChain: Chain) {
-        this.chain = newChain
+    fun setGraph(newGraph: TreeVertex<GraphElement>) {
+        this.graph = newGraph
         removeAllViews()
         graphViews.clear()
 
-        chain.graph?.let {
+        graph?.let {
             prepareId(it)
             addAllElementsView(it)
             createConnections(connections, it)
@@ -884,8 +884,8 @@ class GraphView : FrameLayout {
         autoPosition { }
     }
 
-    fun getChain(): Chain {
-        return chain
+    fun getGraph(): TreeVertex<GraphElement>?{
+        return graph
     }
 
     private fun addGraphView(graphElement: GraphElement) {

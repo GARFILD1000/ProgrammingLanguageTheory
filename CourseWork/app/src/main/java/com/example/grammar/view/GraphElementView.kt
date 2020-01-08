@@ -126,29 +126,29 @@ class GraphElementView(context: Context, var data: GraphElement): LinearLayout(c
 //                    onSelect(asset.assetId)
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    if (!connectionStarted && (abs(startPoint.x - event.rawX) > touchSlop && abs(startPoint.y - event.rawY) > touchSlop)){
-                        connectionStarted = true
-                        onCreateConnection(data, LineLayout.FORWARD_CONNECTOR)
-                        movingPosition.x = x - width //- (event.rawX - startPoint.x)
-                        movingPosition.y = y //- (event.rawY - startPoint.y)
-                    }
-                    val pointX = event.rawX
-                    val pointY = event.rawY
-                    val newX = movingPosition.x - (lastPoint.x - pointX) / (parent as ViewGroup).scaleX
-                    val newY = movingPosition.y - (lastPoint.y - pointY) / (parent as ViewGroup).scaleY
-                    movingPosition.x = newX
-                    movingPosition.y = newY
-                    onDragConnection(movingPosition)
-//                    if ((newX > 0 || newX > x) && ((newX + measuredWidth < (parent as ViewGroup).measuredWidth) || newX < x)) {
-//                        x = newX
-//                        moved = true
+//                    if (!connectionStarted && (abs(startPoint.x - event.rawX) > touchSlop && abs(startPoint.y - event.rawY) > touchSlop)){
+//                        connectionStarted = true
+//                        onCreateConnection(data, LineLayout.FORWARD_CONNECTOR)
+//                        movingPosition.x = x - width //- (event.rawX - startPoint.x)
+//                        movingPosition.y = y //- (event.rawY - startPoint.y)
 //                    }
-//                    if ((newY > 0 || newY > y) && ((newY + measuredHeight < (parent as ViewGroup).measuredHeight) || newY < y)) {
-//                        y = newY
-//                        moved = true
-//                    }
-                    lastPoint.x = pointX
-                    lastPoint.y = pointY
+//                    val pointX = event.rawX
+//                    val pointY = event.rawY
+//                    val newX = movingPosition.x - (lastPoint.x - pointX) / (parent as ViewGroup).scaleX
+//                    val newY = movingPosition.y - (lastPoint.y - pointY) / (parent as ViewGroup).scaleY
+//                    movingPosition.x = newX
+//                    movingPosition.y = newY
+//                    onDragConnection(movingPosition)
+////                    if ((newX > 0 || newX > x) && ((newX + measuredWidth < (parent as ViewGroup).measuredWidth) || newX < x)) {
+////                        x = newX
+////                        moved = true
+////                    }
+////                    if ((newY > 0 || newY > y) && ((newY + measuredHeight < (parent as ViewGroup).measuredHeight) || newY < y)) {
+////                        y = newY
+////                        moved = true
+////                    }
+//                    lastPoint.x = pointX
+//                    lastPoint.y = pointY
 
                 }
                 MotionEvent.ACTION_UP -> {
