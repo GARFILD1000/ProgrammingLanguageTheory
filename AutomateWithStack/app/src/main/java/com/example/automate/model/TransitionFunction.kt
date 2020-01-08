@@ -16,13 +16,19 @@ class TransitionFunction {
                         .replace("(", "")
                         .replace(")", "")
                         .split(",")
-                    val transitionRule =
-                        TransitionRule(transitionRuleParts[0], transitionRuleParts[1], transitionRuleParts[2].toCharArray().map { it.toString() })
+                    val transitionRule = TransitionRule(
+                        transitionRuleParts[0].toInt(),
+                        transitionRuleParts[1],
+                        transitionRuleParts[2].toCharArray().map { it.toString() }
+                    )
                     val destinationRuleParts = transitionParts[1]
                         .replace("(", "")
                         .replace(")", "")
                         .split(",")
-                    val destinationRule = DestinationRule(destinationRuleParts[0], destinationRuleParts[1].toCharArray().map { it.toString() })
+                    val destinationRule = DestinationRule(
+                        destinationRuleParts[0].toInt(),
+                        destinationRuleParts[1].toCharArray().map { it.toString() }
+                    )
                     newFunction.add(transitionRule, destinationRule)
                 }
             }

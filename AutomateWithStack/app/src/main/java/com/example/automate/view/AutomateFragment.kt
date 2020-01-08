@@ -36,11 +36,12 @@ class AutomateFragment : Fragment(), CoroutineScope {
 
 
     lateinit var spinnerArrayAdapter: ArrayAdapter<String>
-    var startState = ""
-    var states = emptyArray<String>()
+    var startState = 0
+    var states = emptyArray<Int>()
     var alphabet = emptyArray<String>()
     var transitionFunction = TransitionFunction()
-    var acceptStates = emptyArray<String>()
+    var acceptStates = emptyArray<Int>()
+    var startStack = emptyArray<String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,24 +53,25 @@ class AutomateFragment : Fragment(), CoroutineScope {
             R.layout.fragment_automate, container, false
         )
         binding.lifecycleOwner = this
-        debug()
+//        debug()
         return binding.root
     }
 
     fun debug() {
         val chainToRecognize = "000111"
         val transitionFunction = TransitionFunction()
-        transitionFunction.add(TransitionRule("A", "0", emptyList<String>()), DestinationRule("A",listOf("0")))
-        transitionFunction.add(TransitionRule("A", "0", listOf<String>("0")), DestinationRule("A",listOf("0","0")))
-        transitionFunction.add(TransitionRule("A", "1", listOf<String>("0")), DestinationRule("B",emptyList<String>()))
-        transitionFunction.add(TransitionRule("B", "1", listOf<String>("0")), DestinationRule("B",emptyList<String>()))
-        transitionFunction.add(TransitionRule("B", "", emptyList<String>()), DestinationRule("C",emptyList<String>()))
-        transitionFunction.add(TransitionRule("A", "", emptyList<String>()), DestinationRule("C",emptyList<String>()))
-        val acceptStates = arrayOf("C")
-        val states = arrayOf("A", "B", "C")
+        transitionFunction.add(TransitionRule(0, "0", emptyList<String>()), DestinationRule(0,listOf("0")))
+        transitionFunction.add(TransitionRule(0, "0", listOf<String>("0")), DestinationRule(0,listOf("0","0")))
+        transitionFunction.add(TransitionRule(0, "1", listOf<String>("0")), DestinationRule(1,emptyList<String>()))
+        transitionFunction.add(TransitionRule(0, "1", listOf<String>("0")), DestinationRule(1,emptyList<String>()))
+        transitionFunction.add(TransitionRule(0, "", emptyList<String>()), DestinationRule(2,emptyList<String>()))
+        transitionFunction.add(TransitionRule(0, "", emptyList<String>()), DestinationRule(2,emptyList<String>()))
+        val acceptStates = arrayOf(2)
+        val states = arrayOf(0, 1, 2)
         val alphabet = arrayOf("0", "1")
-        val startState = "A"
-        val automate = Automate(states, alphabet, transitionFunction, startState, acceptStates)
+        val startState = 0
+        val startStack = arrayOf<String>()
+        val automate = Automate(states, alphabet, transitionFunction, startState, acceptStates, startStack)
         automate.recognize(chainToRecognize).let {
             Log.d(
                 "Debug",
@@ -91,7 +93,7 @@ class AutomateFragment : Fragment(), CoroutineScope {
         statesEditText.doOnTextChanged { text: CharSequence?, start: Int, count: Int, after: Int ->
             spinnerArrayAdapter.clear()
             text?.let {
-                spinnerArrayAdapter.addAll(it.toList().map { "$it" })
+                spinnerArrayAdapter.addAll(it.split(" "))
             }
         }
 
@@ -104,14 +106,13 @@ class AutomateFragment : Fragment(), CoroutineScope {
             checkChain()
         }
 
-
-        addNonTerminalFilter()
         createRuleList()
     }
 
     fun loadAutomate() {
         launch {
             LanguageRepository.getFirstAutomate()?.let { automate ->
+                Log.d(LOG_TAG, "Loaded automate: \n$automate")
                 val builder = StringBuilder()
                 automate.states.forEach { builder.append(it) }
                 statesEditText.setText(builder.toString())
@@ -126,7 +127,7 @@ class AutomateFragment : Fragment(), CoroutineScope {
                 builder.clear()
 
                 spinnerArrayAdapter.clear()
-                spinnerArrayAdapter.addAll(automate.states.toList())
+                spinnerArrayAdapter.addAll(automate.states.map{it.toString()})
                 Log.d(
                     "AutomateFragment",
                     "Selected index ${automate.states.indexOf(automate.startState)} of element${automate.startState}"
@@ -149,10 +150,11 @@ class AutomateFragment : Fragment(), CoroutineScope {
 
     fun checkChain() {
         val chain = inputChain.text.toString()
-        val automate = Automate(states, alphabet, transitionFunction, startState, acceptStates)
+        val automate = Automate(states, alphabet, transitionFunction, startState, acceptStates, startStack)
         launch {
             LanguageRepository.deleteAllAutomate()
             LanguageRepository.insertAutomate(automate)
+            Log.d(LOG_TAG, "Saved automate: \n$automate")
         }
         val result = automate.recognize(chain)
         Toast.makeText(context, "Is recognized = ${result.isRecognized}", Toast.LENGTH_LONG).show()
@@ -160,107 +162,34 @@ class AutomateFragment : Fragment(), CoroutineScope {
     }
 
     fun prepareStates() {
-        states = statesEditText.text.toString().toCharArray().toList().map { it.toString() }
-            .toTypedArray()
+        var statesList = mutableListOf<Int>()
+        statesEditText.text.toString().split(" ").forEach {
+            it.toIntOrNull()?.let{
+                statesList.add(it)
+            }
+        }
+        states = statesList.toTypedArray()
         alphabet = alphabetEditText.text.toString().toCharArray().toList().map { it.toString() }
             .toTypedArray()
-        acceptStates =
-            acceptStatesEditText.text.toString().toCharArray().toList().map { it.toString() }
-                .toTypedArray()
-        startStateSpinner.selectedItem?.toString()?.let {
+        statesList = mutableListOf<Int>()
+        acceptStatesEditText.text.toString().split(" ").forEach {
+            it.toIntOrNull()?.let{
+                statesList.add(it)
+            }
+        }
+        acceptStates = statesList.toTypedArray()
+        startStateSpinner.selectedItem?.toString()?.toIntOrNull()?.let {
             startState = it
         }
         transitionFunction.clear()
         adapter.getItems().forEach{
             transitionFunction.add(it.first, it.second)
         }
+        startStack = startStackEditText.text.toString().toCharArray().toList().map{it.toString()}.toTypedArray()
     }
 
     fun addTransitionRule(){
-        adapter.addItem(Pair(TransitionRule("","", emptyList()), DestinationRule("", emptyList())))
-    }
-
-
-    private fun addNonTerminalFilter() {
-//        val editFilters = nonTerminalEditText.filters
-//        val newFilters = arrayOfNulls<InputFilter>(editFilters.size + 1)
-////        for (index in 0 until editFilters.size){
-////            newFilters[index] = editFilters[index]
-////        }
-//        System.arraycopy(editFilters, 0, newFilters, 0, editFilters.size)
-//        newFilters[newFilters.size - 1] =  InputFilter.AllCaps()
-//        nonTerminalEditText.filters = newFilters
-//
-//        nonTerminalEditText.addTextChangedListener(object: TextWatcher {
-//            override fun afterTextChanged(s: Editable?) {
-//                s?:return
-//                for (i in 0 until s.length) {
-//                    val character = s.get(i)
-//                    if (i < s.length-1) {
-//                        val nextIndex = s.indexOf(character, i + 1)
-//                        if (nextIndex > 0) {
-//                            s.replace(nextIndex, nextIndex+1, "")
-//                            break
-//                        }
-//                    }
-////                    if (!Character.isLetter(s.get(i))) {
-////
-////                    }
-//                }
-//            }
-//            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-//            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-//        })
-    }
-
-    private fun parseRules(unparsedRules: LinkedList<GrammarRule>): LinkedList<GrammarRule> {
-        val parsedRules = LinkedList<GrammarRule>()
-        for (unparsedRule in unparsedRules) {
-            val unparsedRightPart = unparsedRule.rightPart//.replace(" ", "")
-            if (unparsedRightPart.contains("|")) {
-                val rulesParts = unparsedRightPart.split("|")
-                for (rulePart in rulesParts) {
-                    var rulePartEmptyless = rulePart.replace(" ", "")
-                    parsedRules.add(GrammarRule().apply {
-                        leftPart = unparsedRule.leftPart
-                        this.rightPart = rulePartEmptyless
-                    })
-                }
-            } else {
-                var rulePartEmptyless = unparsedRightPart.replace(" ", "")
-                parsedRules.add(GrammarRule().apply {
-                    this.leftPart = unparsedRule.leftPart
-                    this.rightPart = rulePartEmptyless
-                })
-            }
-        }
-        return parsedRules
-    }
-
-    private fun simplifyRules(rules: LinkedList<GrammarRule>): LinkedList<GrammarRule> {
-        val parsedRules = parseRules(rules)
-        val simplifiedRules = LinkedList<GrammarRule>()
-        val differentLeftParts = LinkedList<String>()
-        for (parsedRule in parsedRules) {
-            if (!differentLeftParts.contains(parsedRule.leftPart)) {
-                differentLeftParts.addLast(parsedRule.leftPart)
-            }
-        }
-        for (leftPart in differentLeftParts) {
-            val ruleBuilder = StringBuilder()
-            val newRule = GrammarRule().apply { this.leftPart = leftPart }
-            for (parsedRule in parsedRules) {
-                if (parsedRule.leftPart == leftPart) {
-                    if (ruleBuilder.length > 0) {
-                        ruleBuilder.append(" | ")
-                    }
-                    ruleBuilder.append(parsedRule.rightPart)
-                }
-            }
-            newRule.rightPart = ruleBuilder.toString()
-            simplifiedRules.add(newRule)
-        }
-        return simplifiedRules
+        adapter.addItem(Pair(TransitionRule(0,"", emptyList()), DestinationRule(0, emptyList())))
     }
 
     override fun onPause() {

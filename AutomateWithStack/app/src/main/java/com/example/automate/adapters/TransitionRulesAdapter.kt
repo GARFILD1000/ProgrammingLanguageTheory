@@ -63,21 +63,16 @@ class TransitionRulesAdapter() : RecyclerView.Adapter<TransitionRulesAdapter.Vie
         val deleteRule = binding.deleteRule
 
         fun bind(item: Pair<TransitionRule, DestinationRule>){
-            ruleLeftState.setText(item.first.state)
+            ruleLeftState.setText(item.first.state.toString())
             ruleLeftSymbol.setText(item.first.symbol)
-            ruleLeftStack.setText(item.first.stack.joinToString())
+            ruleLeftStack.setText(item.first.stack.joinToString(""))
 
-            ruleRightState.setText(item.second.state)
-            ruleRightStack.setText(item.second.stack.joinToString())
-//            ruleRight.addTextChangedListener(object: TextWatcher{
-//                override fun afterTextChanged(p0: Editable?) {}
-//                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-//                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-//
-//                }
-//            })
+            ruleRightState.setText(item.second.state.toString())
+            ruleRightStack.setText(item.second.stack.joinToString(""))
             ruleLeftState.doOnTextChanged { text, start, count, after ->
-                item.first.state = text.toString()
+                text.toString().toIntOrNull()?.let{
+                    item.first.state = it
+                }
             }
             ruleLeftSymbol.doOnTextChanged { text, start, count, after ->
                 item.first.symbol = text.toString()
@@ -86,7 +81,9 @@ class TransitionRulesAdapter() : RecyclerView.Adapter<TransitionRulesAdapter.Vie
                 item.first.stack = text?.map { it.toString() } ?: emptyList()
             }
             ruleRightState.doOnTextChanged { text, start, count, after ->
-                item.second.state = text.toString()
+                text.toString().toIntOrNull()?.let{
+                    item.second.state = it
+                }
             }
             ruleRightStack.doOnTextChanged { text, start, count, after ->
                 item.second.stack = text?.map { it.toString() } ?: emptyList()

@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.automate.model.Automate
 import com.example.automate.model.Grammar
 
-@Database(entities = [Grammar::class, Automate::class], version = 1)
+@Database(entities = [Grammar::class, Automate::class], version = 3)
 abstract class LanguageDatabase : RoomDatabase(){
     abstract fun grammarDao() : GrammarDAO
     abstract fun automateDao(): AutomateDAO

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <FrameLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content">
+
+        <!-- Parent Container -->
+        <LinearLayout
+            android:id="@+id/parentContainer"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:orientation="horizontal"
+            android:layout_margin="5dp"
+            android:background="@drawable/shape_frame_rounded_unselected"
+            android:focusable="true"
+            android:gravity="center"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/dataTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="1dp"
+                android:layout_marginBottom="1dp"
+                android:padding="2dp"
+                android:scaleType="fitXY"
+                android:textAlignment="center"
+                android:textSize="32sp"
+                android:textColor="@color/colorTextDark"
+                android:textStyle="bold"
+                android:text=""
+                android:hint="empty"
+                android:tint="@color/colorDivider" />
+
+
+
+<!--            &lt;!&ndash; Divider Line &ndash;&gt;-->
+<!--            <View-->
+<!--                android:id="@+id/dividerCreateButton"-->
+<!--                android:layout_width="1dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:background="@color/colorDivider"/>-->
+
+<!--            &lt;!&ndash; Button Create Connection &ndash;&gt;-->
+<!--            <ImageButton-->
+<!--                android:id="@+id/createButton"-->
+<!--                android:layout_width="20dp"-->
+<!--                android:layout_height="20dp"-->
+<!--                android:padding="2dp"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:layout_margin="3dp"-->
+<!--                android:scaleType="fitCenter"-->
+<!--                android:src="@drawable/ic_rule_arrow"-->
+<!--                android:tint="@color/colorDivider"-->
+<!--                android:background="@android:color/transparent"/>-->
+
+        </LinearLayout>
+
+        <!-- Connect Buttons -->
+        <ImageView
+            android:id="@+id/connectBackward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:src="@drawable/shape_connect"
+            android:layout_gravity="center_horizontal|top"/>
+
+        <ImageView
+            android:id="@+id/connectForward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:src="@drawable/shape_connect"
+            android:layout_gravity="center_horizontal|bottom"/>
+    </FrameLayout>
+</layout>
